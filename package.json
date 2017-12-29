@@ -1,0 +1,26 @@
+{
+  "name": "react-templater",
+  "version": "0.1.0",
+  "private": false,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "draft-js-export-pdfmake": "^0.1.2",
+    "fs": "^0.0.1-security",
+    "pdfmake": "^0.1.35",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-draft-wysiwyg": "^1.12.2",
+    "react-modal": "^3.1.10",
+    "react-scripts": "1.0.17"
+  },
+  "devDependencies": {
+    "node-sass": "^4.7.2",
+    "sass-loader": "^6.0.6"
+  }
+}
