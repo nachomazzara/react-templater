@@ -27,19 +27,41 @@
   to { transform: rotate(360deg); }
 }
 
-.editor {
-    border-bottom: 1px solid #F1F1F1;
+.container{
+  padding: 15px;
+  max-width: 1200px;
+  margin: auto
 }
 
-button {
-    margin-top: 40px;
-    border: none;
-    background: blue;
-    font-size: 18px;
-    max-width: 250px;
-    width: 100%;
-    cursor: pointer;
-    &:hover {
-        background: darkblue;
-    }
+.editor {
+  min-height: 300px;
+  border: 1px solid #f1f1f1;
+  border-top: none;
+  padding: 15px;
+}
+
+.DraftEditor-editorContainer{
+  z-index: 0 !important; // IDK why has 1 by default
+}
+
+.btn {
+  outline: none;
+  margin-top: 40px;
+  padding: 15px;
+  border: none;
+  font-size: 18px;
+  max-width: 225px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 3px;
+  background: #89e77b;
+  color: #fff;
+  text-transform: uppercase;
+  transition: .1s linear;
+  &:hover {
+    background: #7dc073;
+  }
+  &:disabled {
+    opacity: .5;
+  }
 }

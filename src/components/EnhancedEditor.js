@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
+import MarkupModal from './MarkupModal'
 import { Editor } from 'react-draft-wysiwyg';
-import Modal from 'react-modal'
 
 import { EditorState, convertToRaw, Modifier } from 'draft-js'
 import StateToPdfMake from 'draft-js-export-pdfmake'
@@ -13,8 +13,8 @@ import '../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 
 
 class CustomOption extends Component {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
     this.addDiamond = this.addDiamond.bind(this)
   }
   static propTypes = {
@@ -27,7 +27,7 @@ class CustomOption extends Component {
     const contentState = Modifier.replaceText(
       editorState.getCurrentContent(),
       editorState.getSelection(),
-      '{{DYNAMIC_TEXT_HERE}}',
+      '{{markup}}',
       editorState.getCurrentInlineStyle(),
     );
     onChange(EditorState.push(editorState, contentState, 'insert-characters'));
@@ -35,7 +35,11 @@ class CustomOption extends Component {
 
   render() {
     return (
-      <button onClick={this.addDiamond}>{'{{ }}'}</button>
+      <div className='rdw-dropdown-wrapper'>
+        <a className='rdw-dropdown-selectedtext' onClick={this.addDiamond}>
+          <span>{'{{ }}'}</span>
+        </a>
+      </div>
     )
   }
 }
@@ -47,15 +51,14 @@ class EnhancedEditor extends Component {
     this.state = {
       editorState: EditorState.createEmpty(),
       isOpen: false,
-      inputs: [],
-      replacers: [{}],
+      markups: [],
     }
 
     this.onEditorStateChange = this.onEditorStateChange.bind(this)
     this.save = this.save.bind(this)
     this.replace = this.replace.bind(this)
     this.generate = this.generate.bind(this)
-    this.closeModal = this.closeModal.bind(this)
+    this.onRequestClose = this.onRequestClose.bind(this)
   }
 
   onEditorStateChange (editorState) {
@@ -79,64 +82,41 @@ class EnhancedEditor extends Component {
       pdfMake.vfs = pdfFonts.pdfMake.vfs
       pdfMake.createPdf(pdfmakeContents).download(`example${index}.pdf`)
     })
-
   }
 
   generate () {
     const content = this.state.editorState.getCurrentContent()
-    const raw = convertToRaw(content)
-    var str = JSON.stringify(raw).replace(`<%name%>`, 'nacho')
-    var rex = new RegExp("{{.*?}}", "g")
-    var matchesArray = str.match(rex)
+    const rex = new RegExp("{{.*?}}", "g")
+    const matchesArray = JSON.stringify(convertToRaw(content)).match(rex)
     this.setState({
-      isOpen: true,
-      inputs: matchesArray ? matchesArray.filter((item, pos, arr) => arr.indexOf(item) === pos) : []
+      markups: matchesArray ? matchesArray.filter((item, pos, arr) => arr.indexOf(item) === pos) : [],
+      isOpen: true
     })
   }
 
-  closeModal () {
+  onRequestClose () {
     this.setState({
       isOpen: false
     })
   }
 
   render () {
+    const { isOpen, editorState, markups } = this.state
     return <div>
       <Editor
-      editorState={this.state.editorState}
+      editorState={editorState}
       wrapperClassName="wrapper"
       editorClassName="editor"
       onEditorStateChange={this.onEditorStateChange}
+      toolbar={{
+        options: ['inline', 'blockType'],
+      }}
       toolbarCustomButtons={[<CustomOption />]} />
-      <button onClick={this.generate}>{ 'Generate!' }</button>
-      <Modal isOpen={this.state.isOpen} onRequestClose={this.closeModal}>
-
-      <button onClick={this.save}>{ 'Save this shit!' }</button>
-
-      { this.state.replacers.map((r, index) =>
-        <div key={index}>
-          { this.state.inputs.map((input) =>
-            <div key={index}>
-              <label>{input.replace('{{','').replace('}}','')}</label>
-              <input type='text' value={this.state.replacers[index][input]}
-                     onChange={(e) => {
-                       let newR = [...this.state.replacers]
-                       newR.splice(index, 1, Object.assign({}, this.state.replacers[index], {
-                         [input]: e.target.value,
-                       }))
-                       this.setState({
-                         replacers: newR
-                       })
-                     }}/>
-            </div>
-          ) }
-          <button onClick={() => this.setState({
-            replacers: [...this.state.replacers, {}]
-          })} >{`+`}</button>
-        </div>
-      )
-      }
-    </Modal>
+      <button className='btn' onClick={this.generate}>{ 'Generate!' }</button>
+      { isOpen && <MarkupModal markups={markups}
+                               isOpen={isOpen}
+                               onRequestClose={this.onRequestClose}
+                               save={this.save}/> }
     </div>
   }
 }
